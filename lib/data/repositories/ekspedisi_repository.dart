@@ -9,7 +9,6 @@ class EkspedisiRepository {
 
   // ==================== EKSPEDISI ====================
 
-  /// Ambil semua ekspedisi dengan filter opsional
   Future<List<EkspedisiModel>> getEkspedisi({
     String? lokasiId,
     String? status,
@@ -27,24 +26,21 @@ class EkspedisiRepository {
           kategori_barang:kategori_id(nama),
           diterima_oleh:diterima_oleh_id(nama_lengkap),
           diambil_security:diambil_security_id(nama_lengkap)
-        ''')
+        ''');
+
+    if (lokasiId != null) query = query.eq('lokasi_id', lokasiId);
+    if (status != null) query = query.eq('status', status);
+    if (dari != null) {
+      query = query.gte('created_at', dari.toIso8601String());
+    }
+    if (sampai != null) {
+      query = query.lte('created_at', sampai.toIso8601String());
+    }
+
+    final response = await query
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    if (lokasiId != null) {
-      query = query.eq('lokasi_id', lokasiId) as dynamic;
-    }
-    if (status != null) {
-      query = query.eq('status', status) as dynamic;
-    }
-    if (dari != null) {
-      query = query.gte('created_at', dari.toIso8601String()) as dynamic;
-    }
-    if (sampai != null) {
-      query = query.lte('created_at', sampai.toIso8601String()) as dynamic;
-    }
-
-    final response = await query;
     List<EkspedisiModel> list =
         (response as List).map((e) => EkspedisiModel.fromMap(e)).toList();
 
@@ -54,7 +50,7 @@ class EkspedisiRepository {
         e.nomorEkspedisi.toLowerCase().contains(q) ||
         e.namaPengirim.toLowerCase().contains(q) ||
         e.deskripsiBarang.toLowerCase().contains(q) ||
-        (e.departemenTujuan.toLowerCase().contains(q)) ||
+        e.departemenTujuan.toLowerCase().contains(q) ||
         (e.namaPenerimaManual?.toLowerCase().contains(q) ?? false)
       ).toList();
     }
@@ -62,7 +58,6 @@ class EkspedisiRepository {
     return list;
   }
 
-  /// Ambil satu ekspedisi by ID
   Future<EkspedisiModel> getEkspedisiById(String id) async {
     final response = await _client
         .from('ekspedisi')
@@ -78,7 +73,6 @@ class EkspedisiRepository {
     return EkspedisiModel.fromMap(response);
   }
 
-  /// Buat ekspedisi baru (oleh receptionist)
   Future<EkspedisiModel> createEkspedisi({
     required String lokasiId,
     required String namaPengirim,
@@ -124,7 +118,6 @@ class EkspedisiRepository {
     return EkspedisiModel.fromMap(response);
   }
 
-  /// Security ambil barang (update status + foto)
   Future<void> ambilBarang({
     required String ekspedisiId,
     required List<String> fotoUrls,
@@ -140,7 +133,6 @@ class EkspedisiRepository {
     }).eq('id', ekspedisiId);
   }
 
-  /// Security kirim barang
   Future<void> kirimBarang({
     required String ekspedisiId,
     List<String>? fotoTambahan,
@@ -155,7 +147,6 @@ class EkspedisiRepository {
     await _client.from('ekspedisi').update(data).eq('id', ekspedisiId);
   }
 
-  /// Konfirmasi diterima
   Future<void> konfirmasiDiterima({
     required String ekspedisiId,
     List<String>? fotoBukti,
@@ -173,10 +164,9 @@ class EkspedisiRepository {
 
   // ==================== FOTO UPLOAD ====================
 
-  /// Upload foto ke Supabase Storage
   Future<String> uploadFoto(File file, {String folder = 'barang'}) async {
     final ext = file.path.split('.').last;
-    final fileName = '${folder}/${const Uuid().v4()}.$ext';
+    final fileName = '$folder/${const Uuid().v4()}.$ext';
 
     await _client.storage
         .from('ekspedisi-foto')
@@ -187,7 +177,6 @@ class EkspedisiRepository {
         .getPublicUrl(fileName);
   }
 
-  /// Upload multiple foto
   Future<List<String>> uploadMultipleFoto(
       List<File> files, {String folder = 'barang'}) async {
     final urls = <String>[];
@@ -200,32 +189,35 @@ class EkspedisiRepository {
 
   // ==================== STATISTIK ====================
 
-  /// Statistik dashboard
   Future<Map<String, dynamic>> getStatistik({
     String? lokasiId,
     DateTime? dari,
     DateTime? sampai,
   }) async {
-    var query = _client.from('ekspedisi').select('status, created_at');
+    var query = _client
+        .from('ekspedisi')
+        .select('status, created_at');
 
-    if (lokasiId != null) {
-      query = query.eq('lokasi_id', lokasiId) as dynamic;
+    if (lokasiId != null) query = query.eq('lokasi_id', lokasiId);
+    if (dari != null) {
+      query = query.gte('created_at', dari.toIso8601String());
+    }
+    if (sampai != null) {
+      query = query.lte('created_at', sampai.toIso8601String());
     }
 
-    final response = await query as List;
-    final data = response.map((e) => e as Map<String, dynamic>).toList();
+    final response = await query;
+    final data = (response as List).map((e) => e as Map<String, dynamic>).toList();
 
-    // Hitung per status
     final Map<String, int> perStatus = {};
     int total = 0;
 
     for (final item in data) {
-      final status = item['status'] as String;
-      perStatus[status] = (perStatus[status] ?? 0) + 1;
+      final s = item['status'] as String;
+      perStatus[s] = (perStatus[s] ?? 0) + 1;
       total++;
     }
 
-    // Hitung per hari (7 hari terakhir)
     final Map<String, int> perHari = {};
     final now = DateTime.now();
     for (int i = 6; i >= 0; i--) {
