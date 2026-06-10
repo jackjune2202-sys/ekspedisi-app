@@ -1,8 +1,7 @@
 // lib/core/router/app_router.dart
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../presentation/providers/app_providers.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/dashboard/dashboard_screen.dart';
 import '../../presentation/screens/receptionist/input_barang_screen.dart';
@@ -15,13 +14,9 @@ import '../../presentation/screens/shared/detail_ekspedisi_screen.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login',
-    redirect: (context, state) async {
-      final authState = ref.read(authStateProvider);
-      final isLoggedIn = authState.maybeWhen(
-        data: (s) => s.session != null,
-        orElse: () => false,
-      );
-
+    redirect: (context, state) {
+      final user = Supabase.instance.client.auth.currentUser;
+      final isLoggedIn = user != null;
       final isLoginPage = state.matchedLocation == '/login';
 
       if (!isLoggedIn && !isLoginPage) return '/login';
