@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/models.dart';
 import '../../providers/app_providers.dart';
+import 'konfirmasi_terima_screen.dart';
 
 class AmbilBarangScreen extends ConsumerStatefulWidget {
   final String ekspedisiId;
@@ -261,14 +262,13 @@ class _AmbilBarangScreenState extends ConsumerState<AmbilBarangScreen> {
               loading: _loading,
             ),
           ] else if (item.status == 'dalam_pengiriman') ...[
-            _KonfirmasiTerimaSection(
-              fotoBuktiFiles: _fotoBuktiFiles,
-              catatanCtrl: _catatanTerimaCtrl,
-              onAddFoto: () => _showImageSheet(true),
-              onRemoveFoto: (i) => setState(() => _fotoBuktiFiles.removeAt(i)),
-              onKonfirmasi: _loading ? null : () => _konfirmasiTerima(item),
-              loading: _loading,
-            ),
+          KonfirmasiTerimaSection(
+            item: item,
+            onSelesai: () {
+              _invalidateAll();
+              context.pop();
+            },
+          ),
           ] else ...[
             _SelesaiCard(item: item),
           ],

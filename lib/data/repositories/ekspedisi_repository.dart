@@ -10,53 +10,26 @@ class EkspedisiRepository {
   // ==================== EKSPEDISI ====================
 
   Future<List<EkspedisiModel>> getEkspedisi({
-    String? lokasiId,
-    String? status,
-    DateTime? dari,
-    DateTime? sampai,
-    String? search,
-    int limit = 50,
-    int offset = 0,
-  }) async {
-    var query = _client
-        .from('ekspedisi')
-        .select('''
-          *,
-          lokasi:lokasi_id(nama),
-          kategori_barang:kategori_id(nama),
-          diterima_oleh:diterima_oleh_id(nama_lengkap),
-          diambil_security:diambil_security_id(nama_lengkap)
-        ''');
-
-    if (lokasiId != null) query = query.eq('lokasi_id', lokasiId);
-    if (status != null) query = query.eq('status', status);
-    if (dari != null) {
-      query = query.gte('created_at', dari.toIso8601String());
-    }
-    if (sampai != null) {
-      query = query.lte('created_at', sampai.toIso8601String());
-    }
-
-    final response = await query
-        .order('created_at', ascending: false)
-        .range(offset, offset + limit - 1);
-
-    List<EkspedisiModel> list =
-        (response as List).map((e) => EkspedisiModel.fromMap(e)).toList();
-
-    if (search != null && search.isNotEmpty) {
-      final q = search.toLowerCase();
-      list = list.where((e) =>
-        e.nomorEkspedisi.toLowerCase().contains(q) ||
-        e.namaPengirim.toLowerCase().contains(q) ||
-        e.deskripsiBarang.toLowerCase().contains(q) ||
-        e.departemenTujuan.toLowerCase().contains(q) ||
-        (e.namaPenerimaManual?.toLowerCase().contains(q) ?? false)
-      ).toList();
-    }
-
-    return list;
+  String? lokasiId,
+  String? status,
+  DateTime? dari,
+  DateTime? sampai,
+  String? search,
+  int limit = 50,
+  int offset = 0,
+}) async {
+  print('=== getEkspedisi dipanggil ===');
+  try {
+    var query = _client.from('ekspedisi').select('*');
+    print('=== query dibuat ===');
+    final response = await query.limit(10);
+    print('=== response: ${(response as List).length} data ===');
+    return (response as List).map((e) => EkspedisiModel.fromMap(e)).toList();
+  } catch (e) {
+    print('=== ERROR: $e ===');
+    rethrow;
   }
+}
 
   Future<EkspedisiModel> getEkspedisiById(String id) async {
     final response = await _client

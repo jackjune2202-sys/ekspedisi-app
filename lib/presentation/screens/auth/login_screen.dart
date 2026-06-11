@@ -76,19 +76,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         )
                       ],
                     ),
-                    child: const Icon(
-                      Icons.local_shipping_rounded,
-                      size: 44,
-                      color: AppTheme.primary,
+                    child: Image.asset(
+                      'assets/icons/iconlogin.png',
+                        width: 60,
+                        height: 60,
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 20),
                   const Text(
                     'Buku Ekspedisi',
                     style: TextStyle(
                       fontSize: 28,
+                      fontFamily: 'monospace',
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 255, 255, 255),
                     ),
                   ),
                   const Text(
@@ -221,7 +222,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   const SizedBox(height: 24),
                   const Text(
-                    'v1.0.0 — PT. Wibicon Karya Indonesia',
+                    'v1.0.0 — Icun',
                     style: TextStyle(color: Colors.white54, fontSize: 12),
                   ),
                 ],

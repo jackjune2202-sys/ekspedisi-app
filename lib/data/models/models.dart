@@ -1,4 +1,4 @@
-// lib/data/models/ekspedisi_model.dart
+// lib/data/models/models.dart
 class EkspedisiModel {
   final String id;
   final String nomorEkspedisi;
@@ -42,6 +42,7 @@ class EkspedisiModel {
   final DateTime? selesaiPada;
   final String? catatanSecurity;
   final String? catatanPenerima;
+  final String? tandaTanganPenerima;
 
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -77,6 +78,7 @@ class EkspedisiModel {
     this.selesaiPada,
     this.catatanSecurity,
     this.catatanPenerima,
+    this.tandaTanganPenerima,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -85,53 +87,60 @@ class EkspedisiModel {
       namaPenerimaManual ?? diterimaOlehNama ?? '-';
 
   factory EkspedisiModel.fromMap(Map<String, dynamic> map) {
-    return EkspedisiModel(
-      id: map['id'] ?? '',
-      nomorEkspedisi: map['nomor_ekspedisi'] ?? '',
-      lokasiId: map['lokasi_id'] ?? '',
-      lokasiNama: map['lokasi']?['nama'],
-      namaPengirim: map['nama_pengirim'] ?? '',
-      perusahaanPengirim: map['perusahaan_pengirim'],
-      noTeleponPengirim: map['no_telepon_pengirim'],
-      kategoriId: map['kategori_id'],
-      kategoriNama: map['kategori_barang']?['nama'],
-      deskripsiBarang: map['deskripsi_barang'] ?? '',
-      qty: map['qty'] ?? 1,
-      satuan: map['satuan'] ?? 'pcs',
-      keterangan: map['keterangan'],
-      penerimaId: map['penerima_id'],
-      namaPenerimaManual: map['nama_penerima_manual'],
-      departemenTujuan: map['departemen_tujuan'] ?? '',
-      status: map['status'] ?? 'menunggu',
-      fotoBarangUrls: _parseList(map['foto_barang_urls']),
-      fotoPengirimanUrls: _parseList(map['foto_pengiriman_urls']),
-      fotoBuktiTerimaUrls: _parseList(map['foto_bukti_terima_urls']),
-      diterimaOlehId: map['diterima_oleh_id'],
-      diterimaOlehNama: map['diterima_oleh']?['nama_lengkap'],
-      diterimaPada: map['diterima_pada'] != null
-          ? DateTime.parse(map['diterima_pada'])
-          : null,
-      diambilSecurityId: map['diambil_security_id'],
-      diambilSecurityNama: map['diambil_security']?['nama_lengkap'],
-      diambilPada: map['diambil_pada'] != null
-          ? DateTime.parse(map['diambil_pada'])
-          : null,
-      dikirimPada: map['dikirim_pada'] != null
-          ? DateTime.parse(map['dikirim_pada'])
-          : null,
-      selesaiPada: map['selesai_pada'] != null
-          ? DateTime.parse(map['selesai_pada'])
-          : null,
-      catatanSecurity: map['catatan_security'],
-      catatanPenerima: map['catatan_penerima'],
-      createdAt: DateTime.parse(map['created_at']),
-      updatedAt: DateTime.parse(map['updated_at'] ?? map['created_at']),
-    );
+    try {
+      return EkspedisiModel(
+        id: map['id'] ?? '',
+        nomorEkspedisi: map['nomor_ekspedisi'] ?? '',
+        lokasiId: map['lokasi_id'] ?? '',
+        lokasiNama: map['lokasi'] is Map ? map['lokasi']['nama'] : null,
+        namaPengirim: map['nama_pengirim'] ?? '',
+        perusahaanPengirim: map['perusahaan_pengirim'],
+        noTeleponPengirim: map['no_telepon_pengirim'],
+        kategoriId: map['kategori_id'],
+        kategoriNama: map['kategori_barang'] is Map ? map['kategori_barang']['nama'] : null,
+        deskripsiBarang: map['deskripsi_barang'] ?? '',
+        qty: map['qty'] ?? 1,
+        satuan: map['satuan'] ?? 'pcs',
+        keterangan: map['keterangan'],
+        penerimaId: map['penerima_id'],
+        namaPenerimaManual: map['nama_penerima_manual'],
+        departemenTujuan: map['departemen_tujuan'] ?? '',
+        status: map['status'] ?? 'menunggu',
+        fotoBarangUrls: _parseList(map['foto_barang_urls']),
+        fotoPengirimanUrls: _parseList(map['foto_pengiriman_urls']),
+        fotoBuktiTerimaUrls: _parseList(map['foto_bukti_terima_urls']),
+        diterimaOlehId: map['diterima_oleh_id'],
+        diterimaOlehNama: map['diterima_oleh'] is Map ? map['diterima_oleh']['nama_lengkap'] : null,
+        diterimaPada: map['diterima_pada'] != null
+            ? DateTime.tryParse(map['diterima_pada'])
+            : null,
+        diambilSecurityId: map['diambil_security_id'],
+        diambilSecurityNama: map['diambil_security'] is Map ? map['diambil_security']['nama_lengkap'] : null,
+        diambilPada: map['diambil_pada'] != null
+            ? DateTime.tryParse(map['diambil_pada'])
+            : null,
+        dikirimPada: map['dikirim_pada'] != null
+            ? DateTime.tryParse(map['dikirim_pada'])
+            : null,
+        selesaiPada: map['selesai_pada'] != null
+            ? DateTime.tryParse(map['selesai_pada'])
+            : null,
+        catatanSecurity: map['catatan_security'],
+        catatanPenerima: map['catatan_penerima'],
+        tandaTanganPenerima: map['tanda_tangan_penerima'],
+        createdAt: DateTime.tryParse(map['created_at'] ?? '') ?? DateTime.now(),
+        updatedAt: DateTime.tryParse(map['updated_at'] ?? map['created_at'] ?? '') ?? DateTime.now(),
+      );
+    } catch (e) {
+      print('=== ERROR fromMap: $e ===');
+      print('=== DATA: $map ===');
+      rethrow;
+    }
   }
 
   static List<String> _parseList(dynamic value) {
     if (value == null) return [];
-    if (value is List) return value.cast<String>();
+    if (value is List) return value.map((e) => e.toString()).toList();
     return [];
   }
 
@@ -164,6 +173,7 @@ class EkspedisiModel {
     DateTime? selesaiPada,
     String? catatanSecurity,
     String? catatanPenerima,
+    String? tandaTanganPenerima,
   }) {
     return EkspedisiModel(
       id: id,
@@ -196,13 +206,15 @@ class EkspedisiModel {
       selesaiPada: selesaiPada ?? this.selesaiPada,
       catatanSecurity: catatanSecurity ?? this.catatanSecurity,
       catatanPenerima: catatanPenerima ?? this.catatanPenerima,
+    this.tandaTanganPenerima,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
+      tandaTanganPenerima: tandaTanganPenerima ?? this.tandaTanganPenerima,
     );
   }
 }
 
-// lib/data/models/profile_model.dart
+// ==================== PROFILE MODEL ====================
 class ProfileModel {
   final String id;
   final String namaLengkap;
@@ -245,7 +257,7 @@ class ProfileModel {
       email: map['email'] ?? '',
       role: map['role'] ?? 'penerima',
       lokasiId: map['lokasi_id'],
-      lokasiNama: map['lokasi']?['nama'],
+      lokasiNama: map['lokasi'] is Map ? map['lokasi']['nama'] : null,
       departemen: map['departemen'],
       noHp: map['no_hp'],
       fotoUrl: map['foto_url'],
@@ -254,7 +266,7 @@ class ProfileModel {
   }
 }
 
-// lib/data/models/lokasi_model.dart
+// ==================== LOKASI MODEL ====================
 class LokasiModel {
   final String id;
   final String nama;
@@ -281,7 +293,7 @@ class LokasiModel {
   }
 }
 
-// lib/data/models/kategori_model.dart
+// ==================== KATEGORI MODEL ====================
 class KategoriModel {
   final String id;
   final String nama;
