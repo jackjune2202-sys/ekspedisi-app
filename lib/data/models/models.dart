@@ -206,7 +206,6 @@ class EkspedisiModel {
       selesaiPada: selesaiPada ?? this.selesaiPada,
       catatanSecurity: catatanSecurity ?? this.catatanSecurity,
       catatanPenerima: catatanPenerima ?? this.catatanPenerima,
-    this.tandaTanganPenerima,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
       tandaTanganPenerima: tandaTanganPenerima ?? this.tandaTanganPenerima,
