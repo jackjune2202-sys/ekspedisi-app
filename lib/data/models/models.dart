@@ -112,24 +112,24 @@ class EkspedisiModel {
         diterimaOlehId: map['diterima_oleh_id'],
         diterimaOlehNama: map['diterima_oleh'] is Map ? map['diterima_oleh']['nama_lengkap'] : null,
         diterimaPada: map['diterima_pada'] != null
-            ? DateTime.tryParse(map['diterima_pada'])
+            ? DateTime.tryParse(map['diterima_pada'])?.toLocal()
             : null,
         diambilSecurityId: map['diambil_security_id'],
         diambilSecurityNama: map['diambil_security'] is Map ? map['diambil_security']['nama_lengkap'] : null,
         diambilPada: map['diambil_pada'] != null
-            ? DateTime.tryParse(map['diambil_pada'])
+            ? DateTime.tryParse(map['diambil_pada'])?.toLocal()
             : null,
         dikirimPada: map['dikirim_pada'] != null
-            ? DateTime.tryParse(map['dikirim_pada'])
+            ? DateTime.tryParse(map['dikirim_pada'])?.toLocal()
             : null,
         selesaiPada: map['selesai_pada'] != null
-            ? DateTime.tryParse(map['selesai_pada'])
+            ? DateTime.tryParse(map['selesai_pada'])?.toLocal()
             : null,
         catatanSecurity: map['catatan_security'],
         catatanPenerima: map['catatan_penerima'],
         tandaTanganPenerima: map['tanda_tangan_penerima'],
-        createdAt: DateTime.tryParse(map['created_at'] ?? '') ?? DateTime.now(),
-        updatedAt: DateTime.tryParse(map['updated_at'] ?? map['created_at'] ?? '') ?? DateTime.now(),
+        createdAt: DateTime.tryParse(map['created_at'] ?? '')?.toLocal() ?? DateTime.now(),
+        updatedAt: DateTime.tryParse(map['updated_at'] ?? map['created_at'] ?? '')?.toLocal() ?? DateTime.now(),
       );
     } catch (e) {
       print('=== ERROR fromMap: $e ===');
